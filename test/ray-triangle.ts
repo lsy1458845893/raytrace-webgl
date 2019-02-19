@@ -4,7 +4,7 @@ const ctx = cav.getContext('webgl2') as WebGL2RenderingContext;
 
 import compile_program from '../src/GLProgram';
 import vertex_src from './ray.vs.glsl';
-import fragment_src from './ray-traversal.fs.glsl';
+import fragment_src from './ray-triangle.fs.glsl';
 
 const shader = compile_program(ctx, vertex_src, fragment_src);
 

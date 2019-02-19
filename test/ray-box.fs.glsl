@@ -6,8 +6,8 @@ in vec3 v_ray_dir;
 
 out vec4 color;
 
-bool intersection_test_ray_box(const vec3 box_max, const vec3 box_min,
-                               const vec3 ray_origin, const vec3 ray_direct) {
+bool RayIntersectAABBBoxTest(const vec3 box_max, const vec3 box_min,
+                             const vec3 ray_origin, const vec3 ray_direct) {
   float t1 = (box_max.x - ray_origin.x) / ray_direct.x;
   float t2 = (box_min.x - ray_origin.x) / ray_direct.x;
   float t3 = (box_max.y - ray_origin.y) / ray_direct.y;
@@ -25,7 +25,7 @@ void main() {
   const vec3 box_max = vec3(1., 1., 1.);
   const vec3 box_min = vec3(-1., -1., -1.);
 
-  color = (intersection_test_ray_box(box_max, box_min, u_view_pos, v_ray_dir))
+  color = (RayIntersectAABBBoxTest(box_max, box_min, u_view_pos, v_ray_dir))
               ? vec4(0.5, 0.5, 0.5, 1.0)
               : vec4(0.0, 0.0, 0.0, 1.0);
 }
