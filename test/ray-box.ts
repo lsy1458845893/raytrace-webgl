@@ -1,79 +1,11 @@
-
 const cav = document.getElementById('cav') as HTMLCanvasElement;
 const ctx = cav.getContext('webgl2') as WebGL2RenderingContext;
 
 import compile_program from '../src/GLProgram';
+import vertex_src from './ray.vs.glsl';
+import fragment_src from './ray-box.fs.glsl';
 
-const shader = compile_program(
-    ctx, `#version 300 es
-precision highp float;
-const vec2 vertex_positions[] = vec2[](
-  vec2(-1, -1), vec2(-1,  1), vec2( 1,  1),
-  vec2( 1,  1), vec2( 1, -1), vec2(-1, -1)
-);  
-
-uniform vec2 u_view_port;
-uniform vec3 u_view_pos;
-uniform vec3 u_view_dir;
-uniform mat4 u_view_dir_mat;
-
-out vec3 v_ray_dir;
-
-void main() {
-  vec2 vtx_pos = vertex_positions[gl_VertexID];
-  vec4 ray_dir = vec4(u_view_dir, 1) + u_view_dir_mat * vec4(vtx_pos.xy * u_view_port, 0, 1);
-  v_ray_dir =  ray_dir.w * ray_dir.xyz;
-  gl_Position = vec4(vtx_pos, 0.0, 1.0);
-}
-`,
-    `#version 300 es
-precision highp float;
-
-struct point{
-  vec3 position;
-  vec3 normal;
-};
-
-uniform vec3 u_view_pos;
-in vec3 v_ray_dir;
-
-out vec4 color;
-
-bool intersection_test_ray_triangle(
-  const vec3 points[3],
-  const vec3 ray_origin,
-  const vec3 ray_direct,
-  out   vec3 position
-) {
-  return false;
-}
-
-bool intersection_test_ray_box(
-  const vec3 box_max,
-  const vec3 box_min,
-  const vec3 ray_origin,
-  const vec3 ray_direct
-) {
-  float t1 = (box_max.x - ray_origin.x) / ray_direct.x;
-  float t2 = (box_min.x - ray_origin.x) / ray_direct.x;
-  float t3 = (box_max.y - ray_origin.y) / ray_direct.y;
-  float t4 = (box_min.y - ray_origin.y) / ray_direct.y;
-  float t5 = (box_max.z - ray_origin.z) / ray_direct.z;
-  float t6 = (box_min.z - ray_origin.z) / ray_direct.z;
-
-  float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
-  float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
-
-  return (tmax < 0.0 || tmin > tmax) ? false : true;
-}
-
-void main() {
-  const vec3 box_max = vec3( 1.,  1.,  1.);
-  const vec3 box_min = vec3(-1., -1., -1.);
-
-  color = (intersection_test_ray_box(box_max, box_min, u_view_pos, v_ray_dir)) ?
-    vec4(0.5, 0.5, 0.5, 1.0) : vec4(0.0, 0.0, 0.0, 1.0);
-}`);
+const shader = compile_program(ctx, vertex_src, fragment_src);
 
 const u_view_port = ctx.getUniformLocation(shader, 'u_view_port');
 const u_view_pos = ctx.getUniformLocation(shader, 'u_view_pos');

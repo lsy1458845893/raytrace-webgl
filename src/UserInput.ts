@@ -1,6 +1,7 @@
 
 export class UserPointerLockInput {
   public onDirectionChange: (dx: number, dy: number) => void;
+  public onClick: () => void;
   public velocity: {z: number, x: number} = {z: 0, x: 0};
 
   private lock: boolean = false;
@@ -27,6 +28,7 @@ export class UserPointerLockInput {
 
   private pointerChange() {
     this.lock = (document as any).pointerLockElement ? true : false;
+    this.lock && this.onClick && this.onClick();
   }
 
   private keyDown(key: string) {
