@@ -1,10 +1,13 @@
 
-import {Mat4, Vec2, Vec3, Vec4} from './GLMath';
-import {UserPointerLockInput} from './UserInput';
+import { Mat4, Vec2, Vec3, Vec4 } from './GLMath';
+import { UserPointerLockInput } from './UserInput';
 
 export class PointerLockedUserView {
   public onRefersh: (dt: number) => boolean;
+  public onChange: () => void;
 
+  public width: number;
+  public height: number;
   public position: Vec3 = new Vec3([0, 0, 5]);
   public rotation: Vec2 = new Vec2([0, 0]);
   public direction: Vec3 = new Vec3([0, 0, 1]);
@@ -12,20 +15,27 @@ export class PointerLockedUserView {
 
   private input: UserPointerLockInput;
   private time: number = 0;
-  constructor(cav: HTMLCanvasElement, doc: Document) {
+  constructor(private cav: HTMLCanvasElement, doc: Document) {
     this.input = new UserPointerLockInput(cav, doc);
-
     this.input.onDirectionChange = (dx: number, dy: number) => {
       this.rotation.x += dx;
       this.rotation.y += dy;
+      this.onChange && this.onChange();
     };
+    this.width = cav.width;
+    this.height = cav.height;
   }
 
   public start(t: number = 0) {
+    if (this.cav.width != this.width || this.cav.height != this.height) {
+      this.width = this.cav.width;
+      this.height = this.cav.height;
+      this.onChange && this.onChange();
+    }
     {
       this.direction_inverse = Mat4.rotation_x(this.rotation.x)
-                                   .rotation_y(this.rotation.y)
-                                   .inverse();
+        .rotation_y(this.rotation.y)
+        .inverse();
       let v4 = this.direction_inverse.dot(new Vec4([0, 0, -1, 1])) as Vec4;
       v4.x *= v4.t;
       v4.y *= v4.t;
@@ -36,6 +46,9 @@ export class PointerLockedUserView {
     }
     {
       let v = new Vec4([0, 0, 0, 1]);
+
+      if (this.input.velocity.x || this.input.velocity.z)
+        this.onChange && this.onChange();
 
       v.x += this.input.velocity.x;
       v.z += this.input.velocity.z;

@@ -2,6 +2,7 @@
 precision highp float;
 precision highp int;
 precision highp sampler2D;
+precision highp usampler2D;
 
 uniform vec3 u_view_pos;
 in vec3 v_ray_dir;
@@ -39,12 +40,23 @@ vec3 PointGet(const uint uid) {
   return texelFetch(_points, ivec2(idx, idy), 0).xyz;
 }
 //////////////////////
+uniform usampler2D _triangles;
+uvec3 TriangleGet(const uint uid) {
+  int id = int(uid);
+  int width = int(textureSize(_triangles, 0).x);
+  int idx = id % width;
+  int idy = id / width;
+  return texelFetch(_triangles, ivec2(idx, idy), 0).xyz;
+}
+//////////////////////
 void main() {
   float t;
   vec3 p;
 
+  uvec3 points = TriangleGet(uint(1));
+
   vec3 triangle[3] = vec3[](
-      PointGet(uint(1)), PointGet(uint(2)), PointGet(uint(3)));
+      PointGet(points.x), PointGet(points.y), PointGet(points.z));
 
   if (IntersectRayTriangleTest(triangle, u_view_pos, v_ray_dir, t, p)) {
     if (t < 0.0)
