@@ -1,4 +1,4 @@
-import GLData from "./GLData";
+import GLData from "../src/GLData";
 
 class Vector {
 
@@ -126,4 +126,5 @@ class TriangleSet {
   }
 }
 
-export { Vector, Point, PointTex, Triangle, TriangleTex, TriangleSet };
+
+export { DataVF, Vector, Point, PointTex, Triangle, TriangleTex, TriangleSet, AABBBox };

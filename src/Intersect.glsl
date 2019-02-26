@@ -10,9 +10,7 @@ bool IntersectRayTriangleTest(
     const vec3 triangle[3],
     const vec3 ray_origin,
     const vec3 ray_direct,
-    const bool cullface,
-    out float hit_distance,
-    out vec3 hit_point);
+    out vec3 information);
 // implement
 bool IntersectRayAABBBoxTest(const vec3 box_max, const vec3 box_min, const vec3 ray_origin, const vec3 ray_direct) {
   float t1 = (box_max.x - ray_origin.x) / ray_direct.x;
@@ -28,15 +26,19 @@ bool IntersectRayAABBBoxTest(const vec3 box_max, const vec3 box_min, const vec3 
   return (tmax < 0.0 || tmin > tmax) ? false : true;
 }
 
-bool IntersectRayTriangleTest(const vec3 triangle[3], const vec3 ray_origin, const vec3 ray_direct, const bool cullface, out float hit_distance, out vec3 hit_point) {
+// information
+// hit_point = (1 - x - y) * v0 + x * v1 + y * v2
+// hit_point = ray_origin + z * ray_direct
+bool IntersectRayTriangleTest(
+    const vec3 triangle[3],
+    const vec3 ray_origin,
+    const vec3 ray_direct,
+    out vec3 information) {
   vec3 edge1 = triangle[1] - triangle[0];
   vec3 edge2 = triangle[2] - triangle[0];
   vec3 pvec = cross(ray_direct, edge2);
   float det = dot(edge1, pvec);
-  if (cullface) {
-    if (det <= 0.0)
-      return false;
-  } else if (det == 0.0)
+  if (det <= 0.0)
     return false;
   vec3 tvec = ray_origin - triangle[0];
   float u = dot(tvec, pvec) / det;
@@ -49,7 +51,6 @@ bool IntersectRayTriangleTest(const vec3 triangle[3], const vec3 ray_origin, con
   float t = dot(edge2, qvec) / det;
   if (t < 0.0)
     return false;
-  hit_distance = t;
-  hit_point = ray_origin + t * ray_direct;
+  information = vec3(u, v, t);
   return true;
 }
